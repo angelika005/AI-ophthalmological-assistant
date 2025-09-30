@@ -57,8 +57,8 @@ body {
   position: absolute;
   bottom: 20px;
   left: 20px;
-  color: white;       /* Цвет текста */
-  background-color: rgba(0, 0, 0, 0.5); /* Полупрозрачный фон для читаемости */
+  color: white;
+  background-color: rgba(0, 0, 0, 0.5);
   padding: 10px;
   border-radius: 8px;
   max-width: 90%;
@@ -81,4 +81,69 @@ body {
 
 .start-button:hover {
   background-color: #555dc1;
+}
+
+.common-info-header {
+  text-align: center;
+  width: 100%;
+  margin-top: 40px;
+  margin-bottom: 10px;
+  font-size: 23px;
+  font-family: 'Trebuchet MS';
+}
+
+.common-info-main {
+  display: flex;
+  height: 130px;
+  align-items: center;
+  text-align: center;
+  background-color: #c7eeff;
+  font-size: 16px;
+  font-family: 'Trebuchet MS';
+  padding: 5px;
+  color: #333;
+}
+
+.why-info-header {
+  text-align: center;
+  font-size: 23px;
+  font-family: 'Trebuchet MS';
+}
+
+.why-info-body {
+  display: flex;
+  justify-content: space-between;
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+.item {
+  background-color: #c7eeff;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  padding: 10px;
+  gap: 15px;
+  margin-bottom: 50px;
+}
+
+.circle {
+  width: 50px;
+  height: 50px;
+  background-color: #6772e5;
+  border-radius: 50%;
+  color: white;
+  font-size: 24px;
+  line-height: 50px; /* Центрирует цифру вертикально */
+  font-weight: bold;
+  margin: 0px;
+  flex-shrink: 0;
+}
+
+.text {
+  font-size: 16px;
+  color: #333;
+  padding: 5px;
+  font-family: 'Trebuchet MS';
 }
