@@ -3,15 +3,13 @@ function App() {
     <div className="App">
       <header className="site-header">
         <div className="container">
-            <div className="logo">
-
-            </div>
             <nav className="main-nav">
                 <ul>
-                    <li><a href="#">Главная</a></li>
-                    <li><a href="#">О нас</a></li>
-                    <li><a href="#">Контакты</a></li>
-                    <li>
+                    <li className="buttons"><a href="#">О нас</a></li>
+                    <li className="buttons"><a href="#">Контакты</a></li>
+                    <li><div className="logo"></div></li>
+                    <li className="buttons"><a href="#">Главная</a></li>
+                    <li className="buttons">
                         <div className="auth-buttons">
                             <a href="#" className="login">Вход</a>
                             <span className="separator">/</span>
@@ -22,7 +20,7 @@ function App() {
             </nav>
         </div>
       </header>
-      <m>
+      <div className="m">
         <div className="photo-block">
             <div className="photo-text">
                 <div className="photo-block-main">
@@ -86,8 +84,65 @@ function App() {
                     </div>
                 </div>
             </div>
+            <div className="features">
+                <div className="feature">
+                    <div className="security-img"></div>
+                    <div className="feature-text-header">
+                        <h5>Безопасность данных</h5>
+                    </div>
+                    <div className="feature-text">
+                        Мы ценим вашу конфиденциальность
+                        и используем только учебные данные для обучения нейросети
+                    </div>
+                </div>
+                <div className="feature">
+                    <div className="trustability-img"></div>
+                    <div className="feature-text-header">
+                        <h5>Надежность и устойчивость</h5>
+                    </div>
+                    <div className="feature-text">
+                        Сохранение работоспособности и качества предсказаний
+                         в сложных, нестабильных условиях при аномальных данных
+                    </div>
+                </div>
+                <div className="feature">
+                    <div className="speed-img"></div>
+                    <div className="feature-text-header">
+                        <h5>Скорость обработки данных</h5>
+                    </div>
+                    <div className="feature-text">
+                        Оперативность реакции важна для приложений в реальном времени
+                    </div>
+                </div>
+            </div>
+            <div className="about-us">
+                <div className="about-us-header">О нас</div>
+                <div className="about-us-info">
+                    Привет! Я студент, увлеченный разработкой и созданием собственных проектов.
+                    Этот сайт - мой pet-проект, созданный для практики и освоения новых технологий.
+                    Он помогает мне развивать навыки и готовиться к профессиональной деятельности.
+                    Этот проект - открытая площадка для экспериментов и идей,
+                    всегда рада обратной связи и предложениям по улучшению.
+                </div>
+            </div>
+            <div className="contacts">
+                <div className="contacts-header">
+                    <h3>Контакты</h3>
+                </div>
+                <div className="contacts-info">
+                    <p>E-mail: ....@mail.ru</p>
+                    <p>number: ...</p>
+                </div>
+            </div>
         </div>
-      </m>
+      </div>
+      <div className="warning">
+            <p>Материалы, размещенные на данной странице, носят информационный характер
+               и предназначены для образовательных целей. Посетители сайта не должны
+               использовать их в качестве медицинских рекомендаций.
+               Определение диагноза и выбор методики лечения остается исключительной прерогативой вашего лечащего врача!</p>
+            <a href="https://www.flaticon.com/ru/free-icons/" title="инновации иконки">Инновации иконки от Pixel perfect - Flaticon</a>
+        </div>
     </div>
   );
 }
