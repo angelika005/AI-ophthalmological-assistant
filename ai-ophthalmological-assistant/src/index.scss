@@ -91,7 +91,7 @@ body {
 }
 
 .common-info-main {
-  border-left: 20px solid #5698a1;
+  border-left: 20px solid #72adb5;
   padding-left: 10px;
   height: fit-content;
   display: inline-block;
@@ -99,7 +99,7 @@ body {
   height: 130px;
   align-items: center;
   text-align: center;
-  background-color: #c7eeff;
+  background-color: #f3fdff;
   font-size: 16px;
   font-family: 'Trebuchet MS';
   padding: 5px;
@@ -112,7 +112,7 @@ body {
 }
 
 .why-info-body {
-  background-color: #c7eeff;
+  background-color: #f3fdff;
   display: flex;
   justify-content: space-between;
   max-width: 1500px;
@@ -152,7 +152,7 @@ body {
   display: flex;
   justify-content: space-between;
   font-family: 'Trebuchet MS';
-  background-color: #c7eeff;
+  background-color: #f3fdff;
 }
 
 .feature {
@@ -160,7 +160,7 @@ body {
   align-items: left;
   text-align: left;
   padding: 50px;
-  background-color: #5698a1;
+  background-color: #95c1c7;
   margin: 30px;
   border-radius: 10px;
   cursor: pointer;
@@ -168,7 +168,7 @@ body {
 }
 
 .feature:hover {
-  background-color: #4f8f97;
+  background-color: #72adb5;
 }
 
 .feature-text{
@@ -212,8 +212,8 @@ body {
 }
 
 .about-us-info{
-  border-left: 20px solid #5698a1;
-  background-color: #c7eeff;
+  border-left: 20px solid #72adb5;
+  background-color: #f3fdff;
   padding-left: 10px;
   height: fit-content;
   display: inline-block;
@@ -247,6 +247,7 @@ body {
 }
 
 .m{
+  background-image: url('img/arkii-razmytyi-krasocnyi-fon-oboev.jpg');
   background-color: #ddf5ff;
 }
 .warning {
@@ -256,4 +257,39 @@ body {
   font-family: 'Trebuchet MS';
   padding: 5px;
   background-color: #f3fdff;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+}
+
+.workZone {
+  display: flex;
+  justify-content: space-between;
+  margin-left: 160px;
+  margin-right: 220px;
+}
+
+.workZoneMain {
+  background-image: url('img/arkii-razmytyi-krasocnyi-fon-oboev.jpg');
+  padding-bottom: 40px;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding-top: 20px;
+}
+
+.workZoneInfo {
+  margin-left: 300px;
+  margin-right: 300px;
+  border-radius: 10px;
+  margin-top: 20px;
+  text-align: center;
+  font-size: 25px;
+  font-family: 'Trebuchet MS';
+  padding: 5px;
+  background-color: #f3fdff;
+}
+
+.arrow {
+  padding: 80px;
 }
