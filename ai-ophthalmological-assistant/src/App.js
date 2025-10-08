@@ -10,7 +10,7 @@ function App() {
       <Header />
       {/*<Home />*/}
       {/*<Registration />*/}
-      <WorkZone />
+      {<WorkZone />}
       <Footer />
     </div>
   );

@@ -19,7 +19,7 @@ function ResFromServer() {
     padding: '10px',
     border: '2px dashed #ccc',
     borderRadius: '10px',
-    marginTop: '20px',
+    marginTop: '40px',
     padding: '20px',
     textAlign: 'center',
     width: '300px',

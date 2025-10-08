@@ -34,7 +34,7 @@ function ImageUpload() {
       style={{
         border: dragActive ? '2px dashed #06f' : '2px dashed #ccc',
         borderRadius: '10px',
-        marginTop: '20px',
+        marginTop: '40px',
         padding: '20px',
         textAlign: 'center',
         cursor: 'pointer',
