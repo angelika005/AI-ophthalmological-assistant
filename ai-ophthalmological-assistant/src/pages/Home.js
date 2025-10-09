@@ -1,3 +1,5 @@
+import React from 'react';
+
 const Home = () => {
     return (
     <div className="m">
@@ -95,7 +97,7 @@ const Home = () => {
                     </div>
                 </div>
             </div>
-            <div className="about-us">
+            <div className="about-us" id="about">
                 <div className="about-us-header">О нас</div>
                 <div className="about-us-info">
                     Привет! Я студент, увлеченный разработкой и созданием собственных проектов.
@@ -105,7 +107,7 @@ const Home = () => {
                     всегда рада обратной связи и предложениям по улучшению.
                 </div>
             </div>
-            <div className="contacts">
+            <div className="contacts" id="contacts">
                 <div className="contacts-header">
                     <h3>Контакты</h3>
                 </div>
