@@ -1,6 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
-const Home = () => {
+const Home: React.FC = () => {
+    const navigate = useNavigate();
+
+    const handleStartClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        navigate('/registration');
+    };
+
     return (
     <div className="m">
         <div className="photo-block">
@@ -11,7 +19,11 @@ const Home = () => {
                     <h1>заболеваний глаз</h1>
                 </div>
                 <div className="photo-block-button">
-                    <button class="start-button">
+                    <button 
+                        type="button" 
+                        className="start-button" 
+                        onClick={handleStartClick}
+                    >
                         попробовать сейчас
                         <span className="arrow">&#8594;</span>
                     </button>

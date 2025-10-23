@@ -1,4 +1,6 @@
-function Footer(){
+import React from 'react';
+
+const Footer: React.FC = () => {
     return(
         <div className="warning">
             <p>Материалы, размещенные на данной странице, носят информационный характер

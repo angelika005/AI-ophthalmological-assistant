@@ -1,8 +1,9 @@
-import ImageUpLoad from './../components/ImageUpLoad'
-import ResFromServer from './../components/ResFromServer'
-import Arrow from './../components/Arrow'
+import React from 'react';
+import ImageUpLoad from './../components/ImageUpLoad';
+import ResFromServer from './../components/ResFromServer';
+import Arrow from './../components/Arrow';
 
-const WorkZone = () => {
+const WorkZone: React.FC = () => {
   return (
     <div className="workZoneMain">
         <div className="workZoneInfo">
