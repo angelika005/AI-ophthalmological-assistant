@@ -1,0 +1,100 @@
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: glaucoma_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-glaucoma_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend_network
+
+  # MinIO Object Storage
+  minio:
+    image: minio/minio
+    container_name: glaucoma_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - backend_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s  # ← УМЕНЬШИЛ с 30s до 10s
+      timeout: 10s
+      retries: 5  # ← УВЕЛИЧИЛ с 3 до 5
+
+  # pgAdmin - Web UI для PostgreSQL
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: glaucoma_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - backend_network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: glaucoma_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-glaucoma_db}
+      SECRET_KEY: ${SECRET_KEY:-your-super-secret-key-123}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:3000}
+      S3_ENDPOINT_URL: http://minio:9000
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin123
+      S3_BUCKET_NAME: glaucoma-images
+    depends_on:
+      db:
+        condition: service_healthy
+      minio:  # ← ДОБАВЛЕНО
+        condition: service_healthy  # ← ДОБАВЛЕНО
+    volumes:
+      - .:/app
+      - ./huggingface_cache:/root/.cache/huggingface
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - backend_network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  minio_data:
+
+networks:
+  backend_network:
+    driver: bridge
