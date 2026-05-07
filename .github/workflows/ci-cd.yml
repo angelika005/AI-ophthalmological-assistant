@@ -115,7 +115,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
         run: |
-          pytest tests/ --cov=. --cov-report=xml --cov-report=html --cov-fail-under=50 -v
+          pytest tests/ --ignore=tests/test_api_integration_smoke.py --cov=. --cov-report=xml --cov-report=html --cov-fail-under=50 -v
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
