@@ -1,0 +1,39 @@
+[run]
+# Файлы для анализа покрытия
+source = .
+omit =
+    */tests/*
+    */venv/*
+    */__pycache__/*
+    */site-packages/*
+    setup.py
+
+[report]
+# Пороги покрытия
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise AssertionError
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
+    @abstractmethod
+    @abc.abstractmethod
+    if 0:
+    if False:
+    class.*\bProtocol\):
+    @overload
+
+# Минимальное покрытие
+fail_under = 70
+
+# Точность отчета
+precision = 2
+
+[html]
+# Директория для HTML отчета
+directory = htmlcov
+
+[xml]
+# Файл XML отчета
+output = coverage.xml
