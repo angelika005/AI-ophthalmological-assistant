@@ -104,7 +104,6 @@ jobs:
     needs: [verify-release, build-push]
     environment:
       name: ${{ github.event.inputs.environment || 'production' }}
-      url: ${{ format('https://{0}', secrets.DEPLOYMENT_DOMAIN) }}
     steps:
       - uses: actions/checkout@v4
 
