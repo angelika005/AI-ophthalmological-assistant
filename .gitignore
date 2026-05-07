@@ -209,3 +209,5 @@ __marimo__/
 .idea/
 build/
 node_modules/
+
+SETUP.md

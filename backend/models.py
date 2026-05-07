@@ -1,8 +1,13 @@
-from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, Boolean, Float, DateTime, ForeignKey, Text, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
 from datetime import datetime, timezone
+import enum
+
+class UserRole(str, enum.Enum):
+    USER = "user"
+    ADMIN = "admin"
 
 class User(Base):
     __tablename__ = "users"
@@ -11,20 +16,17 @@ class User(Base):
     username = Column(String(100), unique=True, nullable=False, index=True)
     email = Column(String(100), unique=True, nullable=True)
     password_hash = Column(String(255), nullable=False)
+    role = Column(String(20), default=UserRole.USER.value, nullable=False, index=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
-    # Связи с другими таблицами
     images = relationship("ProcessedImage", back_populates="user", cascade="all, delete-orphan")
     checks = relationship("Check", back_populates="user", cascade="all, delete-orphan")
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
 
 
 class ProcessedImage(Base):
-    """
-    Модель для хранения информации об обработанных изображениях
-    """
     __tablename__ = "processed_images"
     
     id = Column(Integer, primary_key=True, index=True)

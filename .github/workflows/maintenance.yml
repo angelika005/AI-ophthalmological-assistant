@@ -1,0 +1,262 @@
+name: Maintenance - Dependency Updates & Checks
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  # ==========================================
+  # Job 1: Update Python Dependencies
+  # ==========================================
+  update-python-deps:
+    name: Update Python Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-tools
+        run: pip install pip-tools
+
+      - name: Update requirements
+        working-directory: ./backend
+        run: |
+          pip install -U pip setuptools wheel
+          pip-compile --upgrade requirements.txt -o requirements-updated.txt
+          if cmp -s requirements.txt requirements-updated.txt; then
+            echo "No updates available"
+          else
+            mv requirements-updated.txt requirements.txt
+            echo "Requirements updated"
+          fi
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): update Python dependencies'
+          title: 'chore(deps): update Python dependencies'
+          body: 'This PR updates Python dependencies to their latest versions. Please review the changes and run tests.'
+          branch: chore/update-python-deps
+          delete-branch: true
+          labels: 'dependencies,automated'
+
+  # ==========================================
+  # Job 2: Update Node Dependencies
+  # ==========================================
+  update-node-deps:
+    name: Update Node Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Update npm packages
+        working-directory: ./frontend
+        run: npm update --save
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'chore(deps): update Node dependencies'
+          title: 'chore(deps): update Node dependencies'
+          body: 'This PR updates Node dependencies to their latest versions. Please review the changes and run tests.'
+          branch: chore/update-node-deps
+          delete-branch: true
+          labels: 'dependencies,automated'
+
+  # ==========================================
+  # Job 3: Check Docker Image Updates
+  # ==========================================
+  check-docker-updates:
+    name: Check Docker Base Image Updates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Python base image
+        run: |
+          echo "Python 3.11 slim latest digest:"
+          curl -s https://registry.hub.docker.com/v2/repositories/library/python/tags/3.11-slim \
+            | grep -o '"digest":"[^"]*"' | head -1
+
+      - name: Check Node base image
+        run: |
+          echo "Node 18 alpine latest digest:"
+          curl -s https://registry.hub.docker.com/v2/repositories/library/node/tags/18-alpine \
+            | grep -o '"digest":"[^"]*"' | head -1
+
+      - name: Check PostgreSQL base image
+        run: |
+          echo "PostgreSQL 15 alpine latest digest:"
+          curl -s https://registry.hub.docker.com/v2/repositories/library/postgres/tags/15-alpine \
+            | grep -o '"digest":"[^"]*"' | head -1
+
+  # ==========================================
+  # Job 4: License Compliance Check
+  # ==========================================
+  license-check:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install pip-licenses
+        run: pip install pip-licenses
+
+      - name: Check Python licenses
+        working-directory: ./backend
+        run: |
+          pip install -r requirements.txt
+          pip-licenses --format=json > licenses.json
+          cat licenses.json
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Check Node licenses
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm ls --json > node-licenses.json || true
+
+  # ==========================================
+  # Job 5: Security Vulnerability Scan
+  # ==========================================
+  security-audit:
+    name: Security Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install safety
+        run: pip install safety
+
+      - name: Check Python vulnerabilities
+        working-directory: ./backend
+        run: |
+          pip install -r requirements.txt
+          safety check --json || true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Audit npm packages
+        working-directory: ./frontend
+        run: npm audit --json || true
+
+  # ==========================================
+  # Job 6: Code Coverage Report
+  # ==========================================
+  coverage-report:
+    name: Code Coverage Report
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run tests with coverage
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
+        run: |
+          pytest tests/ --cov=. --cov-report=term --cov-report=html
+          echo "Coverage report generated"
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./backend/coverage.xml
+          flags: backend
+        continue-on-error: true
+
+  # ==========================================
+  # Job 7: Performance Baseline
+  # ==========================================
+  performance-baseline:
+    name: Performance Baseline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+          du -sh build/
+          echo "Build size recorded"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Check Python package size
+        working-directory: ./backend
+        run: |
+          pip install -q -r requirements.txt --target ./deps
+          du -sh ./deps
+          rm -rf ./deps
+          echo "Dependencies size recorded"

@@ -24,7 +24,16 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:cov": "react-scripts test --coverage --watchAll=false",
+    "test:e2e": "playwright test",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:report": "playwright show-report",
     "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest-mock-extended": "^3.0.5"
   },
   "eslintConfig": {
     "extends": [

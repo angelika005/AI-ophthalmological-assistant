@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useSEOMetaTags } from '../hooks/useSEOMetaTags';
 import '../styles/Auth.css';
 
 const Login: React.FC = () => {
@@ -11,6 +12,15 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // ✅ SEO оптимизация для страницы входа
+  useSEOMetaTags({
+    title: 'Вход в аккаунт | AI Ophthalmological Assistant',
+    description: 'Войдите в свой аккаунт VisionX для доступа к диагностике глаукомы',
+    canonical: window.location.origin + '/login',
+    robotsDirective: 'index, follow',
+    keywords: 'вход, логин, авторизация, AI Ophthalmological Assistant'
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,16 +38,16 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="auth-page">
+    <main className="auth-page">
       <div className="auth-container">
-        <div className="auth-box">
+        <article className="auth-box">
           <div className="auth-logo">
-            <div className="auth-icon">👁️</div>
-            <h2>Добро пожаловать</h2>
+            <div className="auth-icon" aria-hidden="true">👁️</div>
+            <h1>Добро пожаловать</h1>
             <p className="auth-subtitle">Войдите в свой аккаунт VisionX</p>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message" role="alert">{error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="input-group">
@@ -51,7 +61,7 @@ const Login: React.FC = () => {
                 required
                 autoComplete="username"
               />
-              <span className="input-icon">👤</span>
+              <span className="input-icon" aria-hidden="true">👤</span>
             </div>
 
             <div className="input-group">
@@ -65,7 +75,7 @@ const Login: React.FC = () => {
                 required
                 autoComplete="current-password"
               />
-              <span className="input-icon">🔒</span>
+              <span className="input-icon" aria-hidden="true">🔒</span>
               <button
                 type="button"
                 className="password-toggle"
@@ -88,9 +98,9 @@ const Login: React.FC = () => {
           <p className="auth-footer">
             Нет аккаунта? <Link to="/registration">Зарегистрироваться</Link>
           </p>
-        </div>
+        </article>
       </div>
-    </div>
+    </main>
   );
 };
 

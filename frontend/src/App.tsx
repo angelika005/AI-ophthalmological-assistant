@@ -7,6 +7,7 @@ import Registration from './pages/Registration';
 import Login from './pages/Login';
 import WorkZone from './pages/WorkZone';
 import Profile from './pages/Profile';
+import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -14,7 +15,7 @@ function AppContent() {
   const location = useLocation();
   
   // Список страниц БЕЗ header
-  const noHeaderPages = ['/profile'];
+  const noHeaderPages = ['/profile', '/admin'];
   const showHeader = !noHeaderPages.includes(location.pathname);
 
   return (
@@ -37,6 +38,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
             </ProtectedRoute>
           }
         />

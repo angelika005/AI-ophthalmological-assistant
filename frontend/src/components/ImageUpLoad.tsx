@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import { apiClient } from '../services/apiClient';
 
 interface UploadedImage {
   id: number;
   original_url: string;
   processed_url: string;
   result: string;
-  glaucoma_probability: number;
+  confidence: number;
   filename: string;
   created_at: string;
   status: string;
@@ -77,11 +78,7 @@ const ImageUpload: React.FC = () => {
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const response = await fetch('http://localhost:8000/api/images/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      });
+      const response = await apiClient.postFormData('/api/images/upload', formData);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -90,6 +87,8 @@ const ImageUpload: React.FC = () => {
 
       const data: UploadedImage = await response.json();
       setUploadResult(data);
+      // Заменяем локальный preview на реальный URL из MinIO
+      setImage(data.original_url);
       console.log('Результат загрузки:', data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Неизвестная ошибка');
@@ -198,17 +197,10 @@ const ImageUpload: React.FC = () => {
                 border: '1px solid #4caf50',
               }}
             >
-              <h3 style={{ margin: '0 0 12px 0', color: '#2e7d32' }}>✅ Изображение загружено в MinIO!</h3>
+              <h3 style={{ margin: '0 0 12px 0', color: '#2e7d32' }}>Изображение загружено в MinIO!</h3>
               <p><strong>Статус:</strong> {uploadResult.result}</p>
-              <p><strong>Вероятность глаукомы:</strong> {(uploadResult.glaucoma_probability * 100).toFixed(1)}%</p>
+              <p><strong>Вероятность:</strong> {(uploadResult.confidence * 100).toFixed(1)}%</p>
               <p><strong>Имя файла:</strong> {uploadResult.filename}</p>
-              <p><strong>ID изображения:</strong> {uploadResult.id}</p>
-              <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
-                <strong>URL в MinIO:</strong><br />
-                <code style={{ background: '#f5f5f5', padding: '4px', borderRadius: '4px', fontSize: '11px' }}>
-                  {uploadResult.original_url}
-                </code>
-              </p>
             </div>
           )}
 
@@ -228,7 +220,7 @@ const ImageUpload: React.FC = () => {
                   transition: 'all 0.3s ease',
                 }}
               >
-                {uploading ? '⏳ Загрузка в MinIO...' : '📤 Загрузить в MinIO'}
+                {uploading ? 'Загрузка в MinIO...' : 'Загрузить в MinIO'}
               </button>
             )}
             
@@ -245,7 +237,7 @@ const ImageUpload: React.FC = () => {
                 transition: 'all 0.3s ease',
               }}
             >
-              {uploadResult ? '➕ Загрузить ещё' : '❌ Отменить'}
+              {uploadResult ? 'Загрузить ещё' : 'Отменить'}
             </button>
           </div>
         </div>

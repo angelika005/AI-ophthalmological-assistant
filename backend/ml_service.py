@@ -8,6 +8,7 @@ from transformers import AutoImageProcessor, Swinv2ForImageClassification
 from typing import Dict
 import logging
 import os
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +34,7 @@ class GlaucomaDetectionService:
 
     def predict(self, image_bytes: bytes) -> Dict[str, any]:
         try:
+            start_time = time.perf_counter()
             image_rgb = self.preprocess_image(image_bytes)
             inputs = self.processor(image_rgb, return_tensors="pt")
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
@@ -49,11 +51,14 @@ class GlaucomaDetectionService:
             glaucoma_idx = 1 if self.model.config.id2label.get(1) == "glaucoma" else 0
             glaucoma_probability = float(probabilities[glaucoma_idx])
 
+            processing_time_ms = int((time.perf_counter() - start_time) * 1000)
+
             result = {
                 "predicted_label": predicted_label,
                 "confidence": confidence,
                 "glaucoma_probability": glaucoma_probability,
-                "all_probabilities": {self.model.config.id2label[i]: float(p) for i, p in enumerate(probabilities)}
+                "all_probabilities": {self.model.config.id2label[i]: float(p) for i, p in enumerate(probabilities)},
+                "processing_time_ms": processing_time_ms
             }
 
             logger.info(f"Prediction: {predicted_label} (confidence: {confidence:.2%})")

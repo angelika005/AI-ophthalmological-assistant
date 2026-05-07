@@ -1,10 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { apiClient } from '../services/apiClient';
 
 interface User {
   id: number;
   username: string;
   email?: string;
   token: string;
+  role: 'user' | 'admin';
+  is_active: boolean;
 }
 
 interface AuthContextType {
@@ -13,29 +16,47 @@ interface AuthContextType {
   register: (username: string, password: string, email?: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
+  // Проверка сохраненной сессии при загрузке
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
+    setIsLoading(false);
+  }, []);
+
+  // Слушатель на auth-error event из apiClient
+  useEffect(() => {
+    const handleAuthError = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      console.warn('Auth error detected:', customEvent.detail);
+      
+      // Очищаем состояние при ошибке аутентификации
+      setUser(null);
+      localStorage.removeItem('user');
+    };
+
+    window.addEventListener('auth-error', handleAuthError);
+
+    return () => {
+      window.removeEventListener('auth-error', handleAuthError);
+    };
   }, []);
 
   const login = async (username: string, password: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ username, password }),
+      const response = await apiClient.post('/api/users/login', {
+        username,
+        password,
       });
 
       if (!response.ok) {
@@ -45,9 +66,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       const data = await response.json();
       
-      const userInfoResponse = await fetch('http://localhost:8000/api/users/me', {
-        credentials: 'include',
-      });
+      const userInfoResponse = await apiClient.get('/api/users/me');
 
       let userData: User;
       if (userInfoResponse.ok) {
@@ -57,6 +76,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           username: userInfo.username,
           email: userInfo.email,
           token: data.access_token,
+          role: userInfo.role || 'user',
+          is_active: userInfo.is_active ?? true,
         };
       } else {
         userData = {
@@ -64,6 +85,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           username: data.username,
           email: undefined,
           token: data.access_token,
+          role: 'user',
+          is_active: true,
         };
       }
 
@@ -77,13 +100,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const register = async (username: string, password: string, email?: string) => {
     try {
-      const response = await fetch('http://localhost:8000/api/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // ← ДОБАВЛЕНО
-        body: JSON.stringify({ username, password, email }),
+      const response = await apiClient.post('/api/users/register', {
+        username,
+        password,
+        email,
       });
 
       if (!response.ok) {
@@ -100,15 +120,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = async () => {
     try {
-      await fetch('http://localhost:8000/api/users/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
+      await apiClient.post('/api/users/logout');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
       setUser(null);
       localStorage.removeItem('user');
+      localStorage.removeItem('access_token_time');
     }
   };
 
@@ -120,6 +138,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         register,
         logout,
         isAuthenticated: !!user,
+        isLoading,
       }}
     >
       {children}

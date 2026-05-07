@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
 from jose import JWTError, jwt
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -8,7 +8,6 @@ from database import get_db
 import os
 import secrets
 
-# Получение переменных из окружения
 SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here-change-in-production")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
@@ -18,12 +17,10 @@ security = HTTPBearer(auto_error=False)
 
 
 def generate_refresh_token() -> str:
-    """Генерация криптографически безопасного refresh токена"""
     return secrets.token_urlsafe(64)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    """Создание access токена"""
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -36,7 +33,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 def verify_token(token: str):
-    """Верификация токена"""
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -49,12 +45,17 @@ def verify_token(token: str):
         return None
 
 
+def verify_refresh_token(token: str):
+    if not token or not isinstance(token, str):
+        return None
+    return token
+
+
 async def get_current_user_from_cookie(
     request: Request,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
     db: Session = Depends(get_db)
 ):
-    """Получение текущего пользователя из cookie или header"""
     from models import User
     
     token = None
@@ -92,9 +93,7 @@ async def get_current_user_from_cookie(
 
 
 def get_client_info(request: Request):
-    """Получение информации о клиенте"""
     user_agent = request.headers.get("user-agent", "Unknown")
-    # Получаем реальный IP (учитываем прокси)
     ip_address = request.headers.get("x-forwarded-for")
     if ip_address:
         ip_address = ip_address.split(",")[0].strip()
@@ -102,3 +101,31 @@ def get_client_info(request: Request):
         ip_address = request.client.host if request.client else "Unknown"
     
     return user_agent[:255], ip_address
+
+
+def require_role(allowed_roles: List[str]):
+
+    async def role_checker(
+        current_user = Depends(get_current_user_from_cookie)
+    ):
+        from models import User
+        
+        if not isinstance(current_user, User):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not authenticated"
+            )
+        
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required role: {', '.join(allowed_roles)}. Your role: {current_user.role}"
+            )
+        
+        return current_user
+    
+    return role_checker
+
+
+def require_admin():
+    return require_role(["admin"])
